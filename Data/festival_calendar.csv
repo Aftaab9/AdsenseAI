@@ -1,0 +1,25 @@
+festival_name,date_2025,sensitivity_keywords,description
+Diwali,2025-10-20,alcohol;meat;negative;gambling,"Festival of lights - avoid negative themes, alcohol, meat, and gambling references"
+Eid al-Fitr,2025-03-30,pork;alcohol;non-halal,Islamic festival marking end of Ramadan - respect dietary restrictions
+Eid al-Adha,2025-06-07,pork;alcohol;disrespect,Islamic festival of sacrifice - respect religious practices
+Holi,2025-03-14,consent;harassment;force;non-consensual,Festival of colors - avoid non-consensual themes and harassment
+Independence Day,2025-08-15,political;pakistan;anti-national;partition,National pride day - avoid political controversy and divisive themes
+Republic Day,2025-01-26,political;anti-national;constitution,Constitutional celebration - avoid political controversy
+Ganesh Chaturthi,2025-08-27,disrespect;mockery;religious,Hindu festival celebrating Lord Ganesha - respect religious sentiments
+Durga Puja,2025-09-30,disrespect;mockery;religious;bengali,Major Hindu festival in Eastern India - respect religious and regional sentiments
+Navratri,2025-09-22,alcohol;meat;non-veg;disrespect,"Nine nights of worship - avoid alcohol, meat, and disrespectful content"
+Dussehra,2025-10-02,negative;evil;disrespect,Victory of good over evil - maintain positive messaging
+Karva Chauth,2025-10-09,mockery;tradition;patriarchy,Traditional fasting ritual - balance respect with modern values
+Guru Nanak Jayanti,2025-11-05,disrespect;religious;sikh,Sikh festival celebrating Guru Nanak - respect religious sentiments
+Christmas,2025-12-25,disrespect;religious;christian,Christian festival - respect religious sentiments
+Makar Sankranti,2025-01-14,negative;harvest,Harvest festival - maintain positive messaging
+Pongal,2025-01-15,negative;harvest;tamil;south,Tamil harvest festival - respect regional traditions
+Maha Shivaratri,2025-02-26,disrespect;mockery;religious;shiva,Hindu festival honoring Lord Shiva - respect religious sentiments
+Ramadan,2025-03-01,food;eating;disrespect;fasting,"Islamic month of fasting - respect fasting practices, avoid food promotion"
+Ram Navami,2025-04-06,disrespect;religious;ram;ayodhya,Hindu festival celebrating Lord Ram - respect religious sentiments
+Mahavir Jayanti,2025-04-10,violence;meat;non-veg;jain,"Jain festival - avoid violence, meat, and non-vegetarian content"
+Buddha Purnima,2025-05-12,disrespect;religious;buddhist,Buddhist festival celebrating Buddha's birth - respect religious sentiments
+Raksha Bandhan,2025-08-09,sibling;family;tradition,Festival celebrating sibling bonds - respect family values
+Janmashtami,2025-08-16,disrespect;mockery;krishna;religious,Hindu festival celebrating Lord Krishna's birth - respect religious sentiments
+Onam,2025-08-28,negative;kerala;south;harvest,Kerala harvest festival - respect regional traditions
+Gandhi Jayanti,2025-10-02,violence;disrespect;political;gandhi,Birth anniversary of Mahatma Gandhi - maintain non-violence and respect

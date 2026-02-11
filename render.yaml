@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: adsenseai-campaign-analyzer
+    env: python
+    region: singapore
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt && python -m textblob.download_corpora
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /api/health

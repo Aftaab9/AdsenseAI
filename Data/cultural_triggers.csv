@@ -1,0 +1,83 @@
+keyword,category,alert_message,severity,risk_weight
+beef,Religious,Beef references are highly sensitive in India due to religious beliefs,critical,40
+cow meat,Religious,Cow meat references are highly sensitive in Hindu culture,critical,40
+pork,Religious,Pork references may offend Muslim audiences,high,30
+interfaith,Religious,Interfaith themes can polarize audiences,high,25
+temple,Religious,Religious place references require careful context,medium,15
+mosque,Religious,Religious place references require careful context,medium,15
+church,Religious,Religious place references require careful context,medium,15
+gurudwara,Religious,Religious place references require careful context,medium,15
+hindu muslim,Religious,Religious community comparisons can be divisive,high,30
+fair skin,Colorism,Fair skin references trigger colorism backlash,critical,40
+gora,Colorism,Skin tone language detected - colorism concern,critical,35
+whitening,Colorism,Skin whitening references are highly controversial,critical,40
+fair and lovely,Colorism,Fair skin beauty standards trigger backlash,critical,40
+dark skin,Colorism,Skin tone references can perpetuate colorism,high,30
+dusky,Colorism,Euphemistic skin tone language is problematic,high,25
+complexion,Colorism,Complexion references may imply colorism,medium,20
+pakistan,Geopolitical,Cross-border references can polarize audiences,high,30
+kashmir,Geopolitical,Kashmir references are extremely sensitive,critical,40
+china,Geopolitical,China references can trigger nationalist sentiment,high,25
+border,Geopolitical,Border references may evoke geopolitical tensions,medium,20
+army,Geopolitical,Military references require respectful context,medium,15
+soldier,Geopolitical,Military references require respectful context,medium,15
+alcohol,Cultural,Alcohol promotion has cultural and legal restrictions,medium,20
+drinking,Cultural,Drinking references may conflict with cultural values,medium,18
+consent,Cultural,Consent themes require sensitive handling,high,25
+harassment,Cultural,Harassment themes require careful context,high,30
+dowry,Cultural,Dowry references touch on sensitive social issues,high,25
+caste,Cultural,Caste references are highly sensitive,critical,35
+reservation,Cultural,Reservation policy references can be divisive,high,30
+love jihad,Cultural,Communally charged terminology detected,critical,40
+beef ban,Cultural,Politically and religiously sensitive topic,critical,40
+north indian,Regional,Regional comparisons can be divisive,medium,15
+south indian,Regional,Regional comparisons can be divisive,medium,15
+madrasi,Regional,Outdated regional terminology is offensive,high,25
+objectification,Gender,Objectification themes trigger backlash,high,30
+item song,Gender,Item song references imply objectification,medium,20
+fair bride,Gender,Combines colorism and gender stereotypes,critical,40
+feminism,Gender,Feminism references can be polarizing,high,30
+feminist,Gender,Feminist terminology can trigger backlash,high,30
+women's rights,Gender,Women's rights topics require sensitive handling,medium,20
+misogyny,Gender,Misogyny references indicate problematic content,critical,40
+sexism,Gender,Sexist content triggers strong backlash,critical,40
+patriarchy,Gender,Patriarchy discussions can be divisive,high,25
+gender equality,Gender,Gender equality topics require balanced approach,medium,15
+women empowerment,Gender,Women empowerment themes need authentic messaging,low,10
+scam,Inflammatory,Inflammatory language detected,high,30
+fake,Inflammatory,Accusatory language can trigger backlash,medium,20
+lie,Inflammatory,Accusatory language can trigger backlash,medium,20
+fraud,Inflammatory,Strong accusatory language detected,high,30
+anti-national,Political,Politically charged accusation,critical,40
+traitor,Political,Extreme political accusation,critical,40
+lgbtq,Social,LGBTQ+ topics require sensitive handling in Indian context,high,25
+gay,Social,LGBTQ+ references can be polarizing,high,25
+lesbian,Social,LGBTQ+ references can be polarizing,high,25
+transgender,Social,Transgender topics require respectful handling,medium,20
+section 377,Social,Legally and socially sensitive topic,high,30
+pride,Social,LGBTQ+ pride references can be divisive,medium,20
+dalit,Caste,Caste identity references are highly sensitive,critical,35
+brahmin,Caste,Caste identity references are highly sensitive,high,30
+upper caste,Caste,Caste hierarchy references trigger backlash,critical,35
+lower caste,Caste,Offensive caste terminology,critical,40
+sc st,Caste,Caste category references require sensitivity,high,25
+obc,Caste,Caste category references require sensitivity,medium,20
+manual scavenger,Caste,Caste-based occupation references are sensitive,critical,35
+untouchable,Caste,Extremely offensive caste terminology,critical,40
+poor,Class,Class-based language can be insensitive,medium,15
+rich,Class,Class comparisons can be divisive,low,10
+slum,Class,Class-based location references require sensitivity,medium,20
+poverty,Class,Poverty references need respectful context,medium,18
+bjp,Political,Political party references can polarize,high,30
+congress,Political,Political party references can polarize,high,30
+aap,Political,Political party references can polarize,high,25
+modi,Political,Political leader references are divisive,high,30
+rahul gandhi,Political,Political leader references are divisive,high,30
+kejriwal,Political,Political leader references are divisive,high,25
+hindutva,Political,Politically and religiously charged term,critical,40
+secularism,Political,Politically charged concept in Indian context,high,25
+nationalism,Political,Nationalism references can be polarizing,high,25
+anti-hindu,Religious,Religious accusation triggers backlash,critical,40
+anti-muslim,Religious,Religious accusation triggers backlash,critical,40
+islamophobia,Religious,Religious discrimination accusation,critical,40
+hinduphobia,Religious,Religious discrimination accusation,critical,40

@@ -1,0 +1,120 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.kiro/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing - Exclude ALL test files
+test_*.py
+*_test.py
+pytest_cache/
+.coverage
+htmlcov/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+
+# Documentation - Exclude unnecessary docs
+TASK_*.md
+*_SUMMARY.md
+*_COMPLETE.md
+*_IMPLEMENTATION*.md
+*_INTEGRATION*.md
+*_UPGRADE*.md
+SESSION_SUMMARY.md
+IMPROVEMENTS_COMPLETED.md
+CURRENT_STATUS.md
+WHATS_INTEGRATED.md
+INTEGRATION_STATUS.md
+FIXED_AND_ENHANCED.md
+SCORE_IMPROVEMENTS_SUMMARY.md
+SETUP_COMPLETE.md
+FINAL_*.md
+BRAND_SHOWCASE_ADDED.md
+PERSONA_UI_*.md
+SOLUTION_SUMMARY.md
+FIX_PERSONAS_NOW.md
+CLEAR_CACHE_AND_TEST.txt
+START_HERE*.txt
+OPEN_IN_BROWSER.txt
+REFRESH_BROWSER_NOW.txt
+FIND_EXAMPLES_HERE.txt
+SERVER_RUNNING.md
+
+# Example and demo files
+example_*.py
+demo_*.py
+verify_*.py
+debug_*.py
+analyze_*.py
+create_*.py
+generate_*.py
+download_*.py
+final_*.py
+
+# Batch files
+*.bat
+
+# UI folders (Next.js - not needed for FastAPI deployment)
+UI/
+adsense-ai-risk-analyzer/
+
+# Next.js files in root (from UI integration)
+components/
+hooks/
+lib/
+styles/
+next.config.mjs
+postcss.config.mjs
+tailwind.config.ts
+tsconfig.json
+package.json
+pnpm-lock.yaml
+components.json
+app/globals.css
+app/layout.tsx
+app/page.tsx
+
+# Test HTML
+test_*.html
+
+# Other unnecessary files
+TESTING_GUIDE.md
+QUICK_TEST_GUIDE.md
+QUICK_START_GUIDE.md
+HOW_TO_RUN.md
+INSTALL.md
+PERFORMANCE_OPTIMIZATIONS.md
+IMPROVEMENT_PLAN.md
+REAL_CAMPAIGN_ANALYSIS.md
+BACKEND_TECHNICAL_DOCUMENTATION.md
+ALGORITHMS_AND_FORMULAS.md
+CRITICAL_ALGORITHM_IMPROVEMENTS.md
+CRITICAL_FIXES_IMPLEMENTED.md
+EXAMPLES_FEATURE_ADDED.md
+QUICK_START_NEW_UI.md
+check_files.py

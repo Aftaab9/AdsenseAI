@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdsenseAI - Campaign Risk Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="/static/js/persona_testing.js?v=2"></script>
+    <style>
+        /* ===== PREMIUM DARK THEME VARIABLES ===== */
+        :root {
+            --bg-primary: #030014;
+            --bg-secondary: rgba(15, 15, 35, 0.8);
+            --bg-tertiary: rgba(25, 25, 50, 0.6);
+            --bg-glass: rgba(255, 255, 255, 0.03);
+            --bg-glass-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --gradient-danger: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --accent-primary: #667eea;
+            --accent-secondary: #764ba2;
+            --success: #38ef7d;
+            --success-dark: #11998e;
+            --danger: #f45c43;
+            --danger-dark: #eb3349;
+            --warning: #f5576c;
+            --info: #4facfe;
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --border-glow: rgba(102, 126, 234, 0.5);
+            --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+            --shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --space-xs: 0.25rem; --space-sm: 0.5rem; --space-md: 1rem;
+            --space-lg: 1.5rem; --space-xl: 2rem; --space-2xl: 3rem; --space-3xl: 4rem;
+            --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px; --radius-2xl: 32px;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            line-height: 1.6; min-height: 100vh; overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== ANIMATED BACKGROUND ===== */
+        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+        .bg-animation::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(244, 92, 67, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 60% 60%, rgba(56, 239, 125, 0.08) 0%, transparent 40%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+        @keyframes bgFloat { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(2%, 2%) rotate(1deg); } 50% { transform: translate(0, 4%) rotate(0deg); } 75% { transform: translate(-2%, 2%) rotate(-1deg); } }
+        .orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5; animation: orbFloat 15s ease-in-out infinite; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gradient-primary); top: 10%; left: 10%; }
+        .orb-2 { width: 300px; height: 300px; background: var(--gradient-success); top: 60%; right: 10%; animation-delay: -5s; }
+        .orb-3 { width: 250px; height: 250px; background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); bottom: 20%; left: 30%; animation-delay: -10s; }
+        @keyframes orbFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.05); } 66% { transform: translate(-20px, 20px) scale(0.95); } }
+
+        /* ===== GLASSMORPHISM CARDS ===== */
+        .glass-card {
+            background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: var(--space-xl);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
+        }
+        .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); }
+        .glass-card:hover { background: var(--bg-glass-hover); border-color: rgba(255, 255, 255, 0.15); transform: translateY(-4px); box-shadow: var(--shadow-card), var(--shadow-glow); }
+        .container { max-width: 1400px; margin: 0 auto; padding: var(--space-xl); position: relative; z-index: 1; }
+
+        /* ===== HEADER ===== */
+        header { text-align: center; padding: var(--space-3xl) 0; }
+        .logo-container { display: inline-flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-lg); }
+        .logo-icon { width: 60px; height: 60px; background: var(--gradient-primary); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4); animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4); } 50% { box-shadow: 0 10px 60px rgba(102, 126, 234, 0.6); } }
+        h1 { font-family: 'Space Grotesk', sans-serif; font-size: 4rem; font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-sm); }
+        .subtitle { font-size: 1.25rem; color: var(--text-secondary); font-weight: 400; max-width: 600px; margin: 0 auto; }
+        .badge { display: inline-flex; align-items: center; gap: var(--space-xs); background: var(--bg-glass); border: 1px solid var(--border-glass); padding: var(--space-xs) var(--space-md); border-radius: 100px; font-size: 0.85rem; color: var(--text-secondary); margin-top: var(--space-lg); }
+        .badge-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: blink 2s ease-in-out infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* ===== MAIN GRID ===== */
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); margin-bottom: var(--space-2xl); }
+        @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } h1 { font-size: 2.5rem; } }
+
+        /* ===== FORM STYLES ===== */
+        .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 600; margin-bottom: var(--space-xl); display: flex; align-items: center; gap: var(--space-sm); }
+        .card-title-icon { width: 36px; height: 36px; background: var(--gradient-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .form-group { margin-bottom: var(--space-xl); }
+        label { display: block; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 0.05em; }
+        textarea { width: 100%; min-height: 140px; padding: var(--space-lg); background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 1rem; resize: vertical; transition: all 0.3s ease; }
+        textarea:hover { border-color: rgba(255, 255, 255, 0.2); }
+        textarea:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15); }
+        textarea::placeholder { color: var(--text-muted); }
+        .char-counter { display: flex; justify-content: flex-end; margin-top: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); }
+
+        /* Platform Buttons */
+        .platform-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm); }
+        @media (max-width: 640px) { .platform-grid { grid-template-columns: repeat(2, 1fr); } }
+        .platform-btn { padding: var(--space-md); background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-md); color: var(--text-secondary); font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: var(--space-xs); }
+        .platform-btn:hover { background: var(--bg-glass-hover); border-color: rgba(255, 255, 255, 0.2); color: var(--text-primary); transform: translateY(-2px); }
+        .platform-btn.active { background: var(--gradient-primary); border-color: transparent; color: white; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+
+        /* Date Input */
+        input[type="date"] { width: 100%; padding: var(--space-md); background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-md); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 1rem; transition: all 0.3s ease; }
+        input[type="date"]:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15); }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        /* Toggle Switch */
+        .toggle-container { display: flex; align-items: center; gap: var(--space-md); }
+        .toggle { position: relative; width: 56px; height: 28px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: 100px; cursor: pointer; transition: all 0.3s ease; }
+        .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: var(--text-secondary); border-radius: 50%; transition: all 0.3s ease; }
+        .toggle.active { background: var(--gradient-primary); border-color: transparent; }
+        .toggle.active::after { left: 31px; background: white; }
+
+        /* Image Upload */
+        .image-upload-zone { border: 2px dashed var(--border-glass); border-radius: var(--radius-lg); padding: var(--space-2xl); text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--bg-glass); position: relative; overflow: hidden; }
+        .image-upload-zone:hover { border-color: var(--accent-primary); background: var(--bg-glass-hover); }
+        .image-upload-zone.drag-over { border-color: var(--accent-primary); background: rgba(102, 126, 234, 0.1); transform: scale(1.02); }
+        .upload-icon { font-size: 3rem; margin-bottom: var(--space-md); opacity: 0.5; }
+        .upload-text { color: var(--text-secondary); font-size: 0.95rem; }
+        .upload-hint { color: var(--text-muted); font-size: 0.85rem; margin-top: var(--space-sm); }
+        .image-preview-container { position: relative; margin-top: var(--space-md); display: none; }
+        .image-preview-container.show { display: block; }
+        .image-preview { max-width: 100%; max-height: 200px; border-radius: var(--radius-md); box-shadow: var(--shadow-card); }
+        .remove-image { position: absolute; top: -10px; right: -10px; width: 28px; height: 28px; background: var(--danger); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.3s ease; }
+        .remove-image:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(244, 92, 67, 0.4); }
+
+        /* Submit Button */
+        .submit-btn { width: 100%; padding: var(--space-lg); background: var(--gradient-primary); border: none; border-radius: var(--radius-lg); color: white; font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; margin-top: var(--space-md); }
+        .submit-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s ease; }
+        .submit-btn:hover::before { left: 100%; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4); }
+        .submit-btn:disabled { background: var(--bg-tertiary); color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+        .submit-btn:disabled::before { display: none; }
+
+        /* ===== EXAMPLE BUTTONS ===== */
+        .examples-section { margin-top: var(--space-xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-glass); }
+        .examples-title { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .example-btn { width: 100%; padding: var(--space-md); margin-bottom: var(--space-sm); background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-md); color: var(--text-primary); font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: var(--space-sm); }
+        .example-btn:hover { transform: translateX(8px); border-color: rgba(255, 255, 255, 0.2); }
+        .example-btn.safe { border-left: 3px solid var(--success); }
+        .example-btn.safe:hover { background: rgba(56, 239, 125, 0.1); border-color: var(--success); }
+        .example-btn.moderate { border-left: 3px solid var(--warning); }
+        .example-btn.moderate:hover { background: rgba(245, 87, 108, 0.1); border-color: var(--warning); }
+        .example-btn.risky { border-left: 3px solid var(--danger); }
+        .example-btn.risky:hover { background: rgba(244, 92, 67, 0.1); border-color: var(--danger); }
+
+        /* ===== LOADING STATE ===== */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 0, 20, 0.9); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: var(--space-xl); }
+        .loading-overlay.show { display: flex; }
+        .loader { width: 80px; height: 80px; position: relative; }
+        .loader-ring { position: absolute; width: 100%; height: 100%; border: 3px solid transparent; border-radius: 50%; animation: loaderSpin 1.5s linear infinite; }
+        .loader-ring:nth-child(1) { border-top-color: var(--accent-primary); }
+        .loader-ring:nth-child(2) { width: 60px; height: 60px; top: 10px; left: 10px; border-right-color: var(--accent-secondary); animation-delay: -0.5s; animation-direction: reverse; }
+        .loader-ring:nth-child(3) { width: 40px; height: 40px; top: 20px; left: 20px; border-bottom-color: var(--success); animation-delay: -1s; }
+        @keyframes loaderSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { font-size: 1.1rem; color: var(--text-secondary); animation: loadingPulse 1.5s ease-in-out infinite; }
+        @keyframes loadingPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* ===== RESULTS SECTION ===== */
+        .results-section { display: none; animation: resultsReveal 0.8s ease-out; }
+        .results-section.show { display: block; }
+        @keyframes resultsReveal { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Recommendation Hero */
+        .recommendation-hero { text-align: center; padding: var(--space-3xl); border-radius: var(--radius-2xl); margin-bottom: var(--space-2xl); position: relative; overflow: hidden; }
+        .recommendation-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: inherit; filter: blur(100px); opacity: 0.5; z-index: -1; }
+        .recommendation-hero.go { background: linear-gradient(135deg, rgba(17, 153, 142, 0.2) 0%, rgba(56, 239, 125, 0.2) 100%); border: 1px solid rgba(56, 239, 125, 0.3); }
+        .recommendation-hero.caution { background: linear-gradient(135deg, rgba(240, 147, 251, 0.2) 0%, rgba(245, 87, 108, 0.2) 100%); border: 1px solid rgba(245, 87, 108, 0.3); }
+        .recommendation-hero.stop { background: linear-gradient(135deg, rgba(235, 51, 73, 0.2) 0%, rgba(244, 92, 67, 0.2) 100%); border: 1px solid rgba(244, 92, 67, 0.3); }
+        .recommendation-icon { font-size: 5rem; margin-bottom: var(--space-lg); animation: iconBounce 2s ease-in-out infinite; }
+        @keyframes iconBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .recommendation-title { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 700; margin-bottom: var(--space-md); }
+        .recommendation-hero.go .recommendation-title { color: var(--success); }
+        .recommendation-hero.caution .recommendation-title { color: var(--warning); }
+        .recommendation-hero.stop .recommendation-title { color: var(--danger); }
+        .recommendation-message { font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+        /* ===== SCORE CARDS ===== */
+        .scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-lg); margin-bottom: var(--space-2xl); }
+        @media (max-width: 1024px) { .scores-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .scores-grid { grid-template-columns: 1fr; } }
+        .score-card { background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: var(--space-xl); text-align: center; position: relative; overflow: hidden; transition: all 0.4s ease; }
+        .score-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: var(--shadow-card); }
+        .score-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .score-card.virality::before { background: var(--gradient-success); }
+        .score-card.backlash::before { background: var(--gradient-danger); }
+        .score-card.fatigue::before { background: var(--gradient-warning); }
+        .score-card.exposure::before { background: var(--gradient-info); }
+        .score-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-md); }
+        .score-value { font-family: 'Space Grotesk', sans-serif; font-size: 4rem; font-weight: 700; line-height: 1; margin-bottom: var(--space-sm); }
+        .score-card.virality .score-value { color: var(--success); }
+        .score-card.backlash .score-value { color: var(--danger); }
+        .score-card.fatigue .score-value { color: var(--warning); }
+        .score-card.exposure .score-value { color: var(--info); }
+        .score-description { font-size: 0.9rem; color: var(--text-secondary); }
+
+        /* ===== CHARTS SECTION ===== */
+        .charts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-xl); margin-bottom: var(--space-2xl); }
+        @media (max-width: 1200px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
+        .chart-card { background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: var(--space-xl); }
+        .chart-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 600; margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .chart-container { position: relative; height: 250px; }
+        .chart-container canvas { max-height: 100%; }
+
+        /* Risk Gauge */
+        .gauge-container { position: relative; width: 200px; height: 120px; margin: 0 auto; }
+        .gauge-bg { fill: none; stroke: var(--bg-tertiary); stroke-width: 20; }
+        .gauge-fill { fill: none; stroke-width: 20; stroke-linecap: round; transition: stroke-dashoffset 1.5s ease-out; }
+        .gauge-value { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 700; text-anchor: middle; fill: var(--text-primary); }
+        .gauge-label { font-size: 0.9rem; text-anchor: middle; fill: var(--text-secondary); }
+
+        /* ===== ANALYSIS GRID ===== */
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); margin-bottom: var(--space-2xl); }
+        @media (max-width: 1024px) { .analysis-grid { grid-template-columns: 1fr; } }
+        .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 600; margin-bottom: var(--space-xl); display: flex; align-items: center; gap: var(--space-sm); }
+        .section-icon { width: 32px; height: 32px; background: var(--gradient-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+
+        /* Progress Bars */
+        .progress-item { margin-bottom: var(--space-lg); }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm); }
+        .progress-label { font-size: 0.95rem; font-weight: 500; color: var(--text-secondary); }
+        .progress-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
+        .progress-track { height: 10px; background: var(--bg-tertiary); border-radius: 100px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; background: var(--gradient-primary); border-radius: 100px; width: 0%; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .progress-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 2s infinite; }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        /* Sentiment Bars - Enhanced for both positive AND negative */
+        .sentiment-container { display: flex; gap: var(--space-lg); justify-content: center; }
+        .sentiment-item { text-align: center; flex: 1; max-width: 120px; }
+        .sentiment-bar-container { height: 140px; background: var(--bg-tertiary); border-radius: var(--radius-lg); display: flex; align-items: flex-end; justify-content: center; padding: var(--space-xs); margin-bottom: var(--space-sm); overflow: hidden; }
+        .sentiment-bar { width: 100%; border-radius: var(--radius-md); transition: height 1s ease-out; }
+        .sentiment-bar.positive { background: var(--gradient-success); }
+        .sentiment-bar.negative { background: var(--gradient-danger); }
+        .sentiment-bar.neutral { background: linear-gradient(180deg, #9ca3af, #6b7280); }
+        .sentiment-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-xs); }
+        .sentiment-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 600; color: var(--text-primary); }
+
+        /* ===== ALERTS SECTION ===== */
+        .alerts-container { margin-bottom: var(--space-2xl); }
+        .alert-item { background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: var(--space-lg); margin-bottom: var(--space-md); display: flex; align-items: flex-start; gap: var(--space-md); transition: all 0.3s ease; animation: alertSlide 0.5s ease-out backwards; }
+        .alert-item:hover { transform: translateX(8px); border-color: rgba(255, 255, 255, 0.2); }
+        @keyframes alertSlide { from { opacity: 0; transform: translateX(-20px); } }
+        .alert-icon { width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+        .alert-item.critical .alert-icon { background: rgba(244, 92, 67, 0.2); }
+        .alert-item.high .alert-icon { background: rgba(245, 87, 108, 0.2); }
+        .alert-item.medium .alert-icon { background: rgba(79, 172, 254, 0.2); }
+        .alert-item.low .alert-icon { background: rgba(156, 163, 175, 0.2); }
+        .alert-content { flex: 1; }
+        .alert-header { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-xs); }
+        .alert-keyword { font-weight: 600; color: var(--text-primary); }
+        .alert-badge { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .alert-item.critical .alert-badge { background: rgba(244, 92, 67, 0.2); color: var(--danger); }
+        .alert-item.high .alert-badge { background: rgba(245, 87, 108, 0.2); color: var(--warning); }
+        .alert-item.medium .alert-badge { background: rgba(79, 172, 254, 0.2); color: var(--info); }
+        .alert-item.low .alert-badge { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
+        .alert-message { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .alert-meta { font-size: 0.8rem; color: var(--text-muted); }
+        .no-alerts { text-align: center; padding: var(--space-2xl); color: var(--text-secondary); }
+        .no-alerts-icon { font-size: 3rem; margin-bottom: var(--space-md); opacity: 0.5; }
+
+        /* ===== SUGGESTIONS & OPTIMIZER ===== */
+        .suggestions-section { background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: var(--radius-xl); padding: var(--space-xl); margin-bottom: var(--space-2xl); }
+        .suggestions-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-lg); }
+        .suggestions-icon { width: 48px; height: 48px; background: var(--gradient-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .suggestions-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 600; }
+        .suggestions-subtitle { font-size: 0.9rem; color: var(--text-secondary); }
+        .suggestion-item { display: flex; align-items: flex-start; gap: var(--space-md); padding: var(--space-md); background: var(--bg-glass); border-radius: var(--radius-md); margin-bottom: var(--space-sm); transition: all 0.3s ease; }
+        .suggestion-item:hover { background: var(--bg-glass-hover); transform: translateX(4px); }
+        .suggestion-number { width: 28px; height: 28px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; }
+        .suggestion-text { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; }
+
+        /* ===== VIRAL OPTIMIZER ===== */
+        .optimizer-section { background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%); border: 1px solid rgba(56, 239, 125, 0.2); border-radius: var(--radius-xl); padding: var(--space-xl); margin-bottom: var(--space-2xl); }
+        .optimizer-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-lg); }
+        .optimizer-icon { width: 48px; height: 48px; background: var(--gradient-success); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .optimizer-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 600; color: var(--success); }
+        .optimizer-subtitle { font-size: 0.9rem; color: var(--text-secondary); }
+        .optimizer-tips { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); }
+        @media (max-width: 768px) { .optimizer-tips { grid-template-columns: 1fr; } }
+        .optimizer-tip { background: var(--bg-glass); border-radius: var(--radius-md); padding: var(--space-md); display: flex; align-items: flex-start; gap: var(--space-sm); }
+        .tip-icon { font-size: 1.2rem; }
+        .tip-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        /* ===== SIMILAR CAMPAIGNS ===== */
+        .campaigns-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
+        @media (max-width: 1024px) { .campaigns-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .campaigns-grid { grid-template-columns: 1fr; } }
+        .campaign-card { background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: var(--space-lg); transition: all 0.3s ease; }
+        .campaign-card:hover { transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.2); box-shadow: var(--shadow-card); }
+        .campaign-brand { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .campaign-name { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .campaign-outcome { display: inline-flex; align-items: center; gap: var(--space-xs); font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 100px; margin-bottom: var(--space-md); }
+        .campaign-outcome.success { background: rgba(56, 239, 125, 0.2); color: var(--success); }
+        .campaign-outcome.failure { background: rgba(244, 92, 67, 0.2); color: var(--danger); }
+        .campaign-lesson { font-size: 0.85rem; color: var(--text-muted); font-style: italic; }
+
+        /* ===== IMAGE INSIGHTS ===== */
+        .image-insights-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); }
+        @media (max-width: 640px) { .image-insights-grid { grid-template-columns: 1fr; } }
+        .insight-card { background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: var(--space-md); }
+        .insight-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-xs); }
+        .insight-value { font-size: 0.95rem; color: var(--text-primary); }
+
+        /* ===== FOOTER ===== */
+        footer { text-align: center; padding: var(--space-2xl) 0; color: var(--text-muted); font-size: 0.9rem; }
+        footer a { color: var(--accent-primary); text-decoration: none; }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 100px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* ===== PERSONA CARDS ===== */
+        .persona-card {
+            background: var(--bg-glass);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .persona-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .persona-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-4px) scale(1.02);
+            background: var(--bg-glass-hover);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .persona-card:hover::before {
+            transform: scaleX(1);
+        }
+        .persona-card.selected {
+            border-color: var(--accent-primary);
+            background: rgba(102, 126, 234, 0.15);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.4), 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(1.05);
+        }
+        .persona-card.selected::before {
+            transform: scaleX(1);
+        }
+        .persona-card-emoji {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        .persona-card:hover .persona-card-emoji {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .persona-card-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+            line-height: 1.3;
+        }
+        .persona-card-tagline {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            min-height: 2.8em;
+        }
+        .persona-card-category {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: var(--space-sm);
+            padding-top: var(--space-sm);
+            border-top: 1px solid var(--border-glass);
+        }
+        .persona-card-checkmark {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+            animation: checkmarkPop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes checkmarkPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .persona-card.selected .persona-card-checkmark {
+            display: flex;
+        }
+        
+        /* Persona Grid Responsive */
+        #personaGrid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            max-height: 400px;
+            overflow-y: auto;
+            padding: var(--space-sm);
+        }
+        @media (max-width: 1024px) {
+            #personaGrid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 640px) {
+            #personaGrid {
+                grid-template-columns: 1fr;
+                max-height: 300px;
+            }
+            .persona-card {
+                padding: var(--space-lg);
+            }
+            .persona-card-emoji {
+                font-size: 3rem;
+            }
+        }
+
+        /* ===== AUDIENCE RESPONSE SECTION ===== */
+        .persona-result-item {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .persona-result-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--gradient-primary);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        .persona-result-item:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateX(8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .persona-result-item:hover::before {
+            transform: scaleY(1);
+        }
+        .persona-result-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+        .persona-result-emoji {
+            font-size: 2.5rem;
+            transition: transform 0.3s ease;
+        }
+        .persona-result-item:hover .persona-result-emoji {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .persona-result-info {
+            flex: 1;
+        }
+        .persona-result-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .persona-result-tagline {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .persona-result-score {
+            text-align: center;
+            min-width: 90px;
+            padding: var(--space-sm);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+        .persona-result-score-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: var(--space-xs);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .persona-result-score-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .persona-result-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--border-glass);
+        }
+        @media (max-width: 640px) {
+            .persona-result-details {
+                grid-template-columns: 1fr;
+                gap: var(--space-sm);
+            }
+        }
+        .persona-result-detail {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .persona-result-detail-icon {
+            font-size: 1.3rem;
+            opacity: 0.8;
+        }
+        .persona-result-detail-text {
+            flex: 1;
+        }
+        .persona-result-detail-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+        .persona-result-detail-value {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        /* Resonance Bar Styling with Color Coding */
+        .persona-result-bar {
+            height: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 100px;
+            overflow: hidden;
+            margin-top: var(--space-xs);
+            position: relative;
+        }
+        .persona-result-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            background: var(--gradient-primary);
+        }
+        .persona-result-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        /* Color Coding by Score */
+        .persona-result-item.best-fit {
+            border-left: 4px solid var(--success);
+            background: linear-gradient(90deg, rgba(56, 239, 125, 0.05) 0%, var(--bg-glass) 100%);
+        }
+        .persona-result-item.best-fit .persona-result-score-value {
+            background: var(--gradient-success);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .persona-result-item.best-fit .persona-result-bar-fill {
+            background: var(--gradient-success);
+        }
+        .persona-result-item.best-fit::before {
+            background: var(--gradient-success);
+        }
+        
+        .persona-result-item.worst-fit {
+            border-left: 4px solid var(--danger);
+            background: linear-gradient(90deg, rgba(244, 92, 67, 0.05) 0%, var(--bg-glass) 100%);
+        }
+        .persona-result-item.worst-fit .persona-result-score-value {
+            background: var(--gradient-danger);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .persona-result-item.worst-fit .persona-result-bar-fill {
+            background: var(--gradient-danger);
+        }
+        .persona-result-item.worst-fit::before {
+            background: var(--gradient-danger);
+        }
+        
+        .persona-result-item.moderate-fit {
+            border-left: 4px solid var(--warning);
+            background: linear-gradient(90deg, rgba(245, 87, 108, 0.05) 0%, var(--bg-glass) 100%);
+        }
+        .persona-result-item.moderate-fit .persona-result-score-value {
+            background: var(--gradient-warning);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .persona-result-item.moderate-fit .persona-result-bar-fill {
+            background: var(--gradient-warning);
+        }
+        .persona-result-item.moderate-fit::before {
+            background: var(--gradient-warning);
+        }
+        
+        /* Audience Response Section Header */
+        #audienceResponseSection {
+            animation: sectionReveal 0.6s ease-out;
+        }
+        @keyframes sectionReveal {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Mobile Responsive for Persona Results */
+        @media (max-width: 768px) {
+            .persona-result-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .persona-result-score {
+                width: 100%;
+                margin-top: var(--space-sm);
+            }
+            .persona-result-item {
+                padding: var(--space-md);
+            }
+            .persona-result-emoji {
+                font-size: 3rem;
+            }
+        }
+        
+        /* Summary Stats for Audience Response */
+        .audience-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+            padding: var(--space-lg);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+        }
+        @media (max-width: 768px) {
+            .audience-summary {
+                grid-template-columns: 1fr;
+                gap: var(--space-sm);
+            }
+        }
+        .audience-summary-item {
+            text-align: center;
+            padding: var(--space-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+        .audience-summary-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+        .audience-summary-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ===== UTILITY ===== */
+        .hidden { display: none !important; }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader">
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+        </div>
+        <div class="loading-text">Analyzing your campaign with AI...</div>
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo-container">
+                <div class="logo-icon">🎯</div>
+            </div>
+            <h1>AdsenseAI</h1>
+            <p class="subtitle">AI-Powered Campaign Risk Analyzer for the Indian Market</p>
+            <div class="badge">
+                <span class="badge-dot"></span>
+                <span>Powered by TPB Framework & Gemini AI</span>
+            </div>
+        </header>
+        
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Input Form -->
+            <div class="glass-card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">✍️</span>
+                    Campaign Details
+                </h2>
+                
+                <form id="campaignForm">
+                    <div class="form-group">
+                        <label>Campaign Caption <span id="captionRequired">*</span></label>
+                        <textarea id="caption" placeholder="Enter your campaign caption, ad copy, or social media post... (Optional if image is provided)"></textarea>
+                        <div class="char-counter">
+                            <span id="charCount">0</span> characters
+                            <span id="imageOnlyIndicator" class="hidden" style="margin-left: var(--space-md); color: var(--info);">📷 Image-only analysis enabled</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Platform *</label>
+                        <div class="platform-grid">
+                            <button type="button" class="platform-btn" data-platform="Instagram">📸 Instagram</button>
+                            <button type="button" class="platform-btn" data-platform="YouTube">▶️ YouTube</button>
+                            <button type="button" class="platform-btn" data-platform="TikTok">🎵 TikTok</button>
+                            <button type="button" class="platform-btn" data-platform="Twitter">🐦 Twitter</button>
+                        </div>
+                        <input type="hidden" id="platform" name="platform">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Posting Date (Optional)</label>
+                        <input type="date" id="postingDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Influencer Partnership</label>
+                        <div class="toggle-container">
+                            <div class="toggle" id="influencerToggle"></div>
+                            <span id="influencerLabel" style="color: var(--text-secondary);">No</span>
+                        </div>
+                        <input type="hidden" id="influencer" value="false">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Campaign Image (Optional)</label>
+                        <div class="image-upload-zone" id="imageUploadZone">
+                            <div class="upload-icon">📸</div>
+                            <div class="upload-text">Drag & drop image here or click to upload</div>
+                            <div class="upload-hint">Supports: JPEG, PNG, GIF, WebP (Max 10MB)</div>
+                            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <img id="imagePreview" class="image-preview" alt="Preview">
+                            <button type="button" class="remove-image" id="removeImage">×</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Persona Testing Section -->
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" id="personaToggleLabel">
+                            <span>🎯 Test Against Audiences (Optional)</span>
+                            <span id="personaToggleIcon" style="font-size: 1.2rem; transition: transform 0.3s ease;">▼</span>
+                        </label>
+                        <div id="personaSection" style="display: none; margin-top: var(--space-md);">
+                            <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-md);">
+                                <button type="button" class="platform-btn" id="selectAllPersonas" style="flex: 1;">✓ Select All</button>
+                                <button type="button" class="platform-btn" id="clearAllPersonas" style="flex: 1;">✗ Clear All</button>
+                            </div>
+                            <div id="personaGrid">
+                                <!-- Persona cards will be loaded here -->
+                                <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: var(--space-xl);">
+                                    Loading personas...
+                                </div>
+                            </div>
+                            <div id="personaCount" style="margin-top: var(--space-md); text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                                0 personas selected
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="analyzeBtn" disabled>🚀 Analyze Campaign</button>
+                </form>
+            </div>
+
+            <!-- Info & Examples -->
+            <div class="glass-card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">💡</span>
+                    How It Works
+                </h2>
+                
+                <div style="color: var(--text-secondary); margin-bottom: var(--space-xl);">
+                    <p style="margin-bottom: var(--space-md);">
+                        AdsenseAI uses the <strong style="color: var(--text-primary);">Theory of Planned Behaviour (TPB)</strong> 
+                        framework combined with AI to predict campaign outcomes for the Indian market.
+                    </p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-xl);">
+                    <div style="background: var(--bg-glass); padding: var(--space-md); border-radius: var(--radius-md);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-xs);">📊</div>
+                        <div style="font-weight: 600; margin-bottom: var(--space-xs);">Content Analysis</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">EMC, NAM, SCS scores</div>
+                    </div>
+                    <div style="background: var(--bg-glass); padding: var(--space-md); border-radius: var(--radius-md);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-xs);">🎭</div>
+                        <div style="font-weight: 600; margin-bottom: var(--space-xs);">Sentiment</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Emotion detection</div>
+                    </div>
+                    <div style="background: var(--bg-glass); padding: var(--space-md); border-radius: var(--radius-md);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-xs);">🇮🇳</div>
+                        <div style="font-weight: 600; margin-bottom: var(--space-xs);">Cultural Check</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">81 sensitivity triggers</div>
+                    </div>
+                    <div style="background: var(--bg-glass); padding: var(--space-md); border-radius: var(--radius-md);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-xs);">🔮</div>
+                        <div style="font-weight: 600; margin-bottom: var(--space-xs);">Predictions</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Virality & backlash</div>
+                    </div>
+                </div>
+                
+                <div class="examples-section">
+                    <div class="examples-title"><span>⚡</span><span>Quick Examples</span></div>
+                    <button type="button" class="example-btn safe" data-example="safe"><span>✅</span><span>Safe: Diwali Celebration Campaign</span></button>
+                    <button type="button" class="example-btn moderate" data-example="moderate"><span>⚠️</span><span>Moderate: Festival Food Promotion</span></button>
+                    <button type="button" class="example-btn risky" data-example="risky"><span>🛑</span><span>Risky: Colorism Beauty Ad</span></button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <!-- Recommendation Hero -->
+            <div class="recommendation-hero" id="recommendationHero">
+                <div class="recommendation-icon" id="recommendationIcon">🎯</div>
+                <h2 class="recommendation-title" id="recommendationTitle">Analyzing...</h2>
+                <p class="recommendation-message" id="recommendationMessage"></p>
+            </div>
+            
+            <!-- Score Cards -->
+            <div class="scores-grid">
+                <div class="score-card virality">
+                    <div class="score-label">Virality Score</div>
+                    <div class="score-value" id="viralityScore">--</div>
+                    <div class="score-description">Sharing Likelihood</div>
+                </div>
+                <div class="score-card backlash">
+                    <div class="score-label">Backlash Risk</div>
+                    <div class="score-value" id="backlashScore">--</div>
+                    <div class="score-description">Negative Reaction</div>
+                </div>
+                <div class="score-card fatigue">
+                    <div class="score-label">Ad-Fatigue Risk</div>
+                    <div class="score-value" id="fatigueScore">--</div>
+                    <div class="score-description">Audience Irritation</div>
+                </div>
+                <div class="score-card exposure">
+                    <div class="score-label">Exposure Intensity</div>
+                    <div class="score-value" id="exposureScore">--</div>
+                    <div class="score-description">Reach Potential</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-grid">
+                <!-- TPB Radar Chart -->
+                <div class="chart-card">
+                    <div class="chart-title">🧠 TPB Framework Analysis</div>
+                    <div class="chart-container">
+                        <canvas id="tpbRadarChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Sentiment Donut Chart -->
+                <div class="chart-card">
+                    <div class="chart-title">🎭 Sentiment Breakdown</div>
+                    <div class="chart-container">
+                        <canvas id="sentimentDonutChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Risk Comparison Chart -->
+                <div class="chart-card">
+                    <div class="chart-title">⚡ Virality vs Backlash</div>
+                    <div class="chart-container">
+                        <canvas id="riskComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Risk Gauge Section -->
+            <div class="analysis-grid">
+                <div class="glass-card">
+                    <h3 class="section-title"><span class="section-icon">🎯</span>Overall Risk Assessment</h3>
+                    <div style="display: flex; justify-content: center; align-items: center; padding: var(--space-xl);">
+                        <svg class="gauge-container" viewBox="0 0 200 120" id="riskGauge">
+                            <path class="gauge-bg" d="M 20 100 A 80 80 0 0 1 180 100" />
+                            <path class="gauge-fill" id="gaugeFill" d="M 20 100 A 80 80 0 0 1 180 100" stroke="url(#gaugeGradient)" />
+                            <defs>
+                                <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#38ef7d"/>
+                                    <stop offset="50%" style="stop-color:#f5576c"/>
+                                    <stop offset="100%" style="stop-color:#eb3349"/>
+                                </linearGradient>
+                            </defs>
+                            <text class="gauge-value" x="100" y="85" id="gaugeValue">--</text>
+                            <text class="gauge-label" x="100" y="105" id="gaugeLabel">Risk Level</text>
+                        </svg>
+                    </div>
+                    <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;" id="riskInterpretation">Analyzing risk factors...</div>
+                </div>
+                
+                <!-- Content Scores -->
+                <div class="glass-card">
+                    <h3 class="section-title"><span class="section-icon">📊</span>Content Characteristic Scores</h3>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Emotional-Moral Content (EMC)</span>
+                            <span class="progress-value" id="emcValue">--</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" id="emcBar" style="background: var(--gradient-info);"></div></div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Narrative Ambiguity (NAM)</span>
+                            <span class="progress-value" id="namValue">--</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" id="namBar" style="background: var(--gradient-warning);"></div></div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Socio-Cultural Sensitivity (SCS)</span>
+                            <span class="progress-value" id="scsValue">--</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" id="scsBar" style="background: var(--gradient-danger);"></div></div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Perceived Intent</span>
+                            <span class="progress-value" id="intentValue">--</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" id="intentBar" style="background: var(--gradient-success);"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Suggestions Section -->
+            <div class="suggestions-section" id="suggestionsSection">
+                <div class="suggestions-header">
+                    <div class="suggestions-icon">🤖</div>
+                    <div>
+                        <div class="suggestions-title">AI-Powered Suggestions</div>
+                        <div class="suggestions-subtitle">How to improve your campaign</div>
+                    </div>
+                </div>
+                <div id="suggestionsList"></div>
+            </div>
+            
+            <!-- Viral Optimizer Section -->
+            <div class="optimizer-section" id="optimizerSection">
+                <div class="optimizer-header">
+                    <div class="optimizer-icon">🚀</div>
+                    <div>
+                        <div class="optimizer-title">Viral Potential Optimizer</div>
+                        <div class="optimizer-subtitle">Tips to maximize your reach</div>
+                    </div>
+                </div>
+                <div class="optimizer-tips" id="optimizerTips">
+                    <div class="optimizer-tip"><span class="tip-icon">✨</span><span class="tip-text">Add emotional storytelling to increase engagement</span></div>
+                    <div class="optimizer-tip"><span class="tip-icon">🎯</span><span class="tip-text">Use trending hashtags relevant to your audience</span></div>
+                    <div class="optimizer-tip"><span class="tip-icon">📸</span><span class="tip-text">Include high-quality visuals with diverse representation</span></div>
+                    <div class="optimizer-tip"><span class="tip-icon">⏰</span><span class="tip-text">Post during peak engagement hours (7-9 PM IST)</span></div>
+                </div>
+            </div>
+
+            <!-- Cultural Alerts -->
+            <div class="glass-card alerts-container">
+                <h3 class="section-title"><span class="section-icon">⚠️</span>Cultural Sensitivity Alerts</h3>
+                <div id="alertsList">
+                    <div class="no-alerts">
+                        <div class="no-alerts-icon">✅</div>
+                        <div>No cultural sensitivity issues detected</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Image Insights -->
+            <div class="glass-card hidden" id="imageInsightsSection">
+                <h3 class="section-title"><span class="section-icon">🖼️</span>Image Analysis Insights</h3>
+                <div class="image-insights-grid" id="imageInsightsGrid">
+                    <div class="insight-card">
+                        <div class="insight-label">Visual Emotions</div>
+                        <div class="insight-value" id="visualEmotions">--</div>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-label">Cultural Symbols</div>
+                        <div class="insight-value" id="culturalSymbols">--</div>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-label">Text Overlay</div>
+                        <div class="insight-value" id="textOverlay">--</div>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-label">Visual EMC Score</div>
+                        <div class="insight-value" id="visualEMC">--</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Similar Campaigns -->
+            <div class="glass-card" id="campaignsSection">
+                <h3 class="section-title"><span class="section-icon">📚</span>Similar Historical Campaigns</h3>
+                <div class="campaigns-grid" id="campaignsList">
+                    <div class="no-alerts">
+                        <div class="no-alerts-icon">📭</div>
+                        <div>No similar campaigns found</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reasoning Section -->
+            <div class="glass-card" id="reasoningSection">
+                <h3 class="section-title"><span class="section-icon">📋</span>Analysis Reasoning</h3>
+                <div id="reasoningList" style="color: var(--text-secondary);"></div>
+            </div>
+            
+            <!-- Audience Response Section -->
+            <div class="glass-card hidden" id="audienceResponseSection">
+                <h3 class="section-title"><span class="section-icon">🎯</span>Audience Response Analysis</h3>
+                <div id="audienceResponseContent">
+                    <!-- Persona results will be displayed here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer>
+            <p>AdsenseAI Campaign Risk Analyzer • Powered by TPB Framework & Gemini AI</p>
+            <p style="margin-top: var(--space-sm);">Built for the Indian Market 🇮🇳</p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== STATE =====
+        let selectedPlatform = null;
+        let selectedImage = null;
+        let isInfluencer = false;
+        let tpbChart = null;
+        let sentimentChart = null;
+        let riskChart = null;
+        
+        // ===== DOM ELEMENTS =====
+        const captionInput = document.getElementById('caption');
+        const charCount = document.getElementById('charCount');
+        const platformBtns = document.querySelectorAll('.platform-btn');
+        const platformInput = document.getElementById('platform');
+        const postingDate = document.getElementById('postingDate');
+        const influencerToggle = document.getElementById('influencerToggle');
+        const influencerLabel = document.getElementById('influencerLabel');
+        const influencerInput = document.getElementById('influencer');
+        const imageUploadZone = document.getElementById('imageUploadZone');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const removeImageBtn = document.getElementById('removeImage');
+        const campaignForm = document.getElementById('campaignForm');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const resultsSection = document.getElementById('resultsSection');
+        
+        // ===== EXAMPLE DATA =====
+        const examples = {
+            safe: {
+                caption: "Celebrating India's diversity this Diwali! 🪔 Join us in spreading joy and light across the nation. May this festival bring happiness to every home. #HappyDiwali #IndianFestival #UnityInDiversity",
+                platform: "Instagram"
+            },
+            moderate: {
+                caption: "Enjoy our special meat dishes this festive season! Limited time offer on all non-veg items. Order now and get 20% off! #FestiveFood #SpecialOffer",
+                platform: "Instagram"
+            },
+            risky: {
+                caption: "Fair skin is the key to beauty! Get our whitening cream now and transform your complexion. Be fair, be beautiful! #FairSkin #BeautyStandards",
+                platform: "Twitter"
+            }
+        };
+        
+        // ===== CHARACTER COUNTER =====
+        captionInput.addEventListener('input', () => {
+            const len = captionInput.value.length;
+            charCount.textContent = len;
+            charCount.style.color = len > 500 ? 'var(--warning)' : len > 1000 ? 'var(--danger)' : 'var(--text-muted)';
+            validateForm();
+        });
+        
+        // ===== PLATFORM SELECTION =====
+        platformBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                platformBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedPlatform = btn.dataset.platform;
+                platformInput.value = selectedPlatform;
+                validateForm();
+            });
+        });
+        
+        // ===== INFLUENCER TOGGLE =====
+        influencerToggle.addEventListener('click', () => {
+            isInfluencer = !isInfluencer;
+            influencerToggle.classList.toggle('active', isInfluencer);
+            influencerLabel.textContent = isInfluencer ? 'Yes' : 'No';
+            influencerInput.value = isInfluencer;
+        });
+
+        // ===== IMAGE UPLOAD =====
+        imageUploadZone.addEventListener('click', () => imageInput.click());
+        imageUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); imageUploadZone.classList.add('drag-over'); });
+        imageUploadZone.addEventListener('dragleave', () => { imageUploadZone.classList.remove('drag-over'); });
+        imageUploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUploadZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) handleImageFile(file);
+        });
+        imageInput.addEventListener('change', (e) => { if (e.target.files[0]) handleImageFile(e.target.files[0]); });
+        removeImageBtn.addEventListener('click', () => {
+            selectedImage = null;
+            imagePreviewContainer.classList.remove('show');
+            imageInput.value = '';
+        });
+        
+        function handleImageFile(file) {
+            if (file.size > 10 * 1024 * 1024) { showNotification('Image too large. Max 10MB allowed.', 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedImage = e.target.result;
+                imagePreview.src = selectedImage;
+                imagePreviewContainer.classList.add('show');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // ===== EXAMPLE BUTTONS =====
+        document.querySelectorAll('.example-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const example = examples[btn.dataset.example];
+                if (example) {
+                    captionInput.value = example.caption;
+                    charCount.textContent = example.caption.length;
+                    platformBtns.forEach(b => { b.classList.toggle('active', b.dataset.platform === example.platform); });
+                    selectedPlatform = example.platform;
+                    platformInput.value = example.platform;
+                    validateForm();
+                    captionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        });
+        
+        // ===== FORM VALIDATION =====
+        function validateForm() {
+            const hasCaption = captionInput.value.trim().length > 0;
+            const hasImage = selectedImage !== null;
+            const hasPlatform = selectedPlatform !== null;
+            
+            // Valid if: (has caption OR has image) AND has platform
+            const valid = (hasCaption || hasImage) && hasPlatform;
+            analyzeBtn.disabled = !valid;
+            
+            // Update UI indicators for image-only mode
+            const captionRequired = document.getElementById('captionRequired');
+            const imageOnlyIndicator = document.getElementById('imageOnlyIndicator');
+            
+            if (hasImage && !hasCaption) {
+                // Image-only mode
+                captionRequired.style.display = 'none';
+                imageOnlyIndicator.classList.remove('hidden');
+            } else {
+                // Normal mode (caption required if no image)
+                captionRequired.style.display = hasImage ? 'none' : 'inline';
+                imageOnlyIndicator.classList.add('hidden');
+            }
+            
+            return valid;
+        }
+
+        // ===== FORM SUBMISSION =====
+        campaignForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!validateForm()) return;
+            
+            // Get selected personas from the module
+            const selectedPersonas = window.PersonaTesting ? window.PersonaTesting.getSelectedPersonas() : [];
+            
+            // Determine if this is image-only analysis
+            const captionText = captionInput.value.trim();
+            const isImageOnly = !captionText && selectedImage;
+            
+            const requestData = {
+                caption: captionText || null,  // Send null if empty for image-only
+                platform: selectedPlatform,
+                posting_date: postingDate.value || null,
+                influencer: isInfluencer,
+                image_base64: selectedImage || null,
+                persona_ids: selectedPersonas.length > 0 ? selectedPersonas : null,
+                image_only: isImageOnly  // Flag for image-only analysis
+            };
+            
+            showLoading(isImageOnly ? 'Extracting text and analyzing image...' : 'Analyzing your campaign with AI...');
+            
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.detail || `Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                displayResults(data, isImageOnly);
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showNotification(error.message || 'Analysis failed. Please try again.', 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+        
+        function showLoading(message = 'Analyzing your campaign with AI...') { 
+            loadingOverlay.classList.add('show'); 
+            analyzeBtn.disabled = true;
+            const loadingText = loadingOverlay.querySelector('.loading-text');
+            if (loadingText) loadingText.textContent = message;
+        }
+        function hideLoading() { loadingOverlay.classList.remove('show'); analyzeBtn.disabled = false; }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `position: fixed; top: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 12px; color: white; font-weight: 500; z-index: 2000; animation: slideIn 0.3s ease-out; max-width: 400px; backdrop-filter: blur(10px); ${type === 'error' ? 'background: rgba(244, 92, 67, 0.9);' : 'background: rgba(102, 126, 234, 0.9);'}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => { notification.style.animation = 'slideOut 0.3s ease-out'; setTimeout(() => notification.remove(), 300); }, 4000);
+        }
+
+        // ===== DISPLAY RESULTS =====
+        function displayResults(data, isImageOnly = false) {
+            resultsSection.classList.add('show');
+            setTimeout(() => resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            
+            // Show image-only analysis indicator if applicable
+            if (isImageOnly && data.image_analysis) {
+                showNotification('📷 Analysis based on image content' + (data.image_analysis.text_overlay ? ' and extracted text' : ''), 'info');
+            }
+            
+            // Recommendation Hero
+            displayRecommendation(data.recommendation);
+            
+            // Score Cards with animation
+            animateScore('viralityScore', data.virality_score);
+            animateScore('backlashScore', data.backlash_risk);
+            animateScore('fatigueScore', data.ad_fatigue_risk);
+            animateScore('exposureScore', data.exposure_intensity);
+            
+            // Charts
+            createTPBRadarChart(data.tpb_scores);
+            createSentimentDonutChart(data.sentiment);
+            createRiskComparisonChart(data.virality_score, data.backlash_risk, data.ad_fatigue_risk, data.exposure_intensity);
+            
+            // Risk Gauge
+            updateRiskGauge(data.backlash_risk);
+            
+            // Content Scores
+            displayContentScores(data);
+            
+            // Alerts
+            displayAlerts(data.cultural_alerts);
+            
+            // Suggestions
+            displaySuggestions(data.recommendation.suggestions || []);
+            
+            // Reasoning
+            displayReasoning(data.recommendation.reasoning || []);
+            
+            // Similar Campaigns
+            displayCampaigns(data.similar_campaigns || []);
+            
+            // Image Insights
+            if (data.image_analysis) {
+                displayImageInsights(data.image_analysis);
+            } else {
+                document.getElementById('imageInsightsSection').classList.add('hidden');
+            }
+            
+            // Persona Results
+            if (data.persona_analysis && data.persona_analysis.persona_results && window.PersonaTesting) {
+                window.PersonaTesting.displayResults(data.persona_analysis.persona_results);
+            } else {
+                document.getElementById('audienceResponseSection').classList.add('hidden');
+            }
+        }
+        
+        function displayRecommendation(rec) {
+            const hero = document.getElementById('recommendationHero');
+            const icon = document.getElementById('recommendationIcon');
+            const title = document.getElementById('recommendationTitle');
+            const message = document.getElementById('recommendationMessage');
+            
+            hero.className = 'recommendation-hero ' + rec.status;
+            const icons = { go: '🚀', caution: '⚠️', stop: '🛑' };
+            icon.textContent = icons[rec.status] || '🎯';
+            title.textContent = rec.action;
+            message.textContent = rec.message;
+        }
+        
+        function animateScore(elementId, target) {
+            const el = document.getElementById(elementId);
+            let current = 0;
+            const duration = 1500;
+            const steps = 60;
+            const increment = target / steps;
+            
+            const interval = setInterval(() => {
+                current += increment;
+                if (current >= target) { current = target; clearInterval(interval); }
+                el.textContent = Math.round(current);
+            }, duration / steps);
+        }
+        
+        // ===== CHART.JS CHARTS =====
+        function createTPBRadarChart(tpb) {
+            const ctx = document.getElementById('tpbRadarChart').getContext('2d');
+            if (tpbChart) tpbChart.destroy();
+            
+            tpbChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Attitude', 'Subjective Norms', 'Perceived Control', 'Behavioral Intention'],
+                    datasets: [{
+                        label: 'TPB Scores',
+                        data: [tpb.attitude, tpb.subjective_norms, tpb.perceived_control, tpb.behavioral_intention],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: 'rgba(255,255,255,0.5)', backdropColor: 'transparent' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            pointLabels: { color: 'rgba(255,255,255,0.7)', font: { size: 11 } }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function createSentimentDonutChart(sentiment) {
+            const ctx = document.getElementById('sentimentDonutChart').getContext('2d');
+            if (sentimentChart) sentimentChart.destroy();
+            
+            sentimentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Negative', 'Neutral'],
+                    datasets: [{
+                        data: [sentiment.positive, sentiment.negative, sentiment.neutral],
+                        backgroundColor: [
+                            'rgba(56, 239, 125, 0.8)',
+                            'rgba(244, 92, 67, 0.8)',
+                            'rgba(156, 163, 175, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(56, 239, 125, 1)',
+                            'rgba(244, 92, 67, 1)',
+                            'rgba(156, 163, 175, 1)'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'rgba(255,255,255,0.7)', padding: 15, usePointStyle: true }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createRiskComparisonChart(virality, backlash, fatigue, exposure) {
+            const ctx = document.getElementById('riskComparisonChart').getContext('2d');
+            if (riskChart) riskChart.destroy();
+            
+            riskChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Virality', 'Backlash', 'Ad-Fatigue', 'Exposure'],
+                    datasets: [{
+                        label: 'Score',
+                        data: [virality, backlash, fatigue, exposure],
+                        backgroundColor: [
+                            'rgba(56, 239, 125, 0.7)',
+                            'rgba(244, 92, 67, 0.7)',
+                            'rgba(245, 87, 108, 0.7)',
+                            'rgba(79, 172, 254, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(56, 239, 125, 1)',
+                            'rgba(244, 92, 67, 1)',
+                            'rgba(245, 87, 108, 1)',
+                            'rgba(79, 172, 254, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.5)' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.7)' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        
+        function updateRiskGauge(backlashRisk) {
+            const gaugeFill = document.getElementById('gaugeFill');
+            const gaugeValue = document.getElementById('gaugeValue');
+            const gaugeLabel = document.getElementById('gaugeLabel');
+            const riskInterpretation = document.getElementById('riskInterpretation');
+            
+            // Calculate stroke-dashoffset (arc length is ~251)
+            const arcLength = 251;
+            const offset = arcLength - (backlashRisk / 100) * arcLength;
+            
+            setTimeout(() => {
+                gaugeFill.style.strokeDasharray = arcLength;
+                gaugeFill.style.strokeDashoffset = offset;
+            }, 100);
+            
+            gaugeValue.textContent = backlashRisk;
+            
+            if (backlashRisk >= 70) {
+                gaugeLabel.textContent = 'HIGH RISK';
+                riskInterpretation.textContent = '⚠️ Critical backlash risk detected. Consider major revisions before launch.';
+            } else if (backlashRisk >= 40) {
+                gaugeLabel.textContent = 'MODERATE RISK';
+                riskInterpretation.textContent = '⚡ Some risk factors present. Review suggestions and make adjustments.';
+            } else {
+                gaugeLabel.textContent = 'LOW RISK';
+                riskInterpretation.textContent = '✅ Campaign appears safe. Minor optimizations may still help.';
+            }
+        }
+
+        function displayContentScores(data) {
+            // EMC Score
+            const emcScore = data.emotional_moral_content?.emc_score || 0;
+            document.getElementById('emcValue').textContent = Math.round(emcScore);
+            setTimeout(() => { document.getElementById('emcBar').style.width = emcScore + '%'; }, 100);
+            
+            // NAM Score
+            const namScore = data.narrative_ambiguity?.nam_score || 0;
+            document.getElementById('namValue').textContent = Math.round(namScore);
+            setTimeout(() => { document.getElementById('namBar').style.width = namScore + '%'; }, 150);
+            
+            // SCS Score
+            const scsScore = data.socio_cultural_sensitivity?.scs_score || 0;
+            document.getElementById('scsValue').textContent = Math.round(scsScore);
+            setTimeout(() => { document.getElementById('scsBar').style.width = scsScore + '%'; }, 200);
+            
+            // Intent Score (convert from -100 to +100 range to 0-100 for display)
+            const intentScore = data.perceived_intent?.intent_score || 0;
+            const normalizedIntent = (intentScore + 100) / 2; // Convert to 0-100
+            document.getElementById('intentValue').textContent = intentScore > 0 ? '+' + Math.round(intentScore) : Math.round(intentScore);
+            setTimeout(() => { document.getElementById('intentBar').style.width = normalizedIntent + '%'; }, 250);
+        }
+
+        function displayAlerts(alerts) {
+            const container = document.getElementById('alertsList');
+            
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = `<div class="no-alerts"><div class="no-alerts-icon">✅</div><div>No cultural sensitivity issues detected</div></div>`;
+                return;
+            }
+            
+            const icons = { critical: '🚨', high: '⚠️', medium: 'ℹ️', low: '💡' };
+            
+            container.innerHTML = alerts.map((alert, i) => `
+                <div class="alert-item ${alert.severity}" style="animation-delay: ${i * 0.1}s">
+                    <div class="alert-icon">${icons[alert.severity] || '⚠️'}</div>
+                    <div class="alert-content">
+                        <div class="alert-header">
+                            <span class="alert-keyword">"${alert.keyword}"</span>
+                            <span class="alert-badge">${alert.severity}</span>
+                        </div>
+                        <div class="alert-message">${alert.message}</div>
+                        <div class="alert-meta">Category: ${alert.category} • Risk Weight: ${alert.risk_weight}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function displaySuggestions(suggestions) {
+            const section = document.getElementById('suggestionsSection');
+            const list = document.getElementById('suggestionsList');
+            
+            if (!suggestions || suggestions.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            section.classList.remove('hidden');
+            list.innerHTML = suggestions.map((s, i) => `
+                <div class="suggestion-item">
+                    <div class="suggestion-number">${i + 1}</div>
+                    <div class="suggestion-text">${s}</div>
+                </div>
+            `).join('');
+        }
+        
+        function displayReasoning(reasoning) {
+            const list = document.getElementById('reasoningList');
+            
+            if (!reasoning || reasoning.length === 0) {
+                list.innerHTML = '<p>No detailed reasoning available.</p>';
+                return;
+            }
+            
+            list.innerHTML = `<ul style="margin-left: 1.5rem; line-height: 1.8;">${reasoning.map(r => `<li>${r}</li>`).join('')}</ul>`;
+        }
+        
+        function displayCampaigns(campaigns) {
+            const container = document.getElementById('campaignsList');
+            
+            if (!campaigns || campaigns.length === 0) {
+                container.innerHTML = `<div class="no-alerts" style="grid-column: 1 / -1;"><div class="no-alerts-icon">📭</div><div>No similar campaigns found</div></div>`;
+                return;
+            }
+            
+            container.innerHTML = campaigns.map(c => `
+                <div class="campaign-card">
+                    <div class="campaign-brand">${c.brand}</div>
+                    <div class="campaign-name">${c.campaign}</div>
+                    <div class="campaign-outcome ${c.outcome.toLowerCase().includes('success') ? 'success' : 'failure'}">
+                        ${c.outcome.toLowerCase().includes('success') ? '✓' : '✗'} ${c.outcome}
+                    </div>
+                    <div class="campaign-lesson">"${c.lesson}"</div>
+                </div>
+            `).join('');
+        }
+        
+        function displayImageInsights(analysis) {
+            const section = document.getElementById('imageInsightsSection');
+            
+            if (!analysis || analysis.error) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            section.classList.remove('hidden');
+            
+            document.getElementById('visualEmotions').textContent = analysis.visual_emotions?.length > 0 ? analysis.visual_emotions.join(', ') : 'None detected';
+            document.getElementById('culturalSymbols').textContent = analysis.cultural_symbols?.length > 0 ? analysis.cultural_symbols.join(', ') : 'None detected';
+            document.getElementById('textOverlay').textContent = analysis.text_overlay || 'None detected';
+            document.getElementById('visualEMC').textContent = analysis.visual_emc_score ? analysis.visual_emc_score + '/100' : 'N/A';
+        }
+        
+        // ===== ANIMATIONS =====
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        `;
+        document.head.appendChild(style);
+        
+        // ===== INIT =====
+        validateForm();
+        
+        // Initialize persona testing module
+        if (typeof initPersonaTesting === 'function') {
+            initPersonaTesting();
+        }
+    </script>
+</body>
+</html>
